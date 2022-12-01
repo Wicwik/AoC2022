@@ -31,7 +31,6 @@ func main() {
 	fileScanner.Split(bufio.ScanLines)
 	var fileNums []int
 	var fileSums []int
-	// maxNums := []int{0, 0, 0}
 
 	for fileScanner.Scan() {
 		str := fileScanner.Text()
