@@ -37,7 +37,7 @@ func main() {
 		{"T", "M", "Z", "J", "Q", "L", "D", "R"},
 	}
 
-	// crates_small := [][]string{
+	// crates := [][]string{
 	// 	{"N", "Z"},
 	// 	{"D", "C", "M"},
 	// 	{"P"},
@@ -63,19 +63,28 @@ func main() {
 
 		// fmt.Println(crates, take, from, to)
 
-		for i := 1; i <= take; i++ {
-			arr := crates[from-1]
-			last := arr[0]
-			crates[from-1] = arr[1:]
+		arr := crates[from-1]
+		last := arr[:take]
+		fmt.Println(arr[take:], last)
+		crates[from-1] = arr[take:]
 
-			crates[to-1] = append([]string{last}, crates[to-1]...)
+		tmp := []string{}
+		for i, _ := range last {
+			// fmt.Println(v)
+			tmp = append(tmp, last[len(last)-1-i])
 		}
 
+		for _, v := range tmp {
+			fmt.Println(v)
+			crates[to-1] = append([]string{v}, crates[to-1]...)
+		}
+		// fmt.Println(crts)
 	}
 
 	for _, v := range crates {
 		fmt.Print(v[0])
 	}
+
 	fmt.Println()
 	fmt.Println(crates)
 }
