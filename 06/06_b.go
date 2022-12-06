@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func check(e error) {
@@ -31,6 +32,22 @@ func main() {
 	for fileScanner.Scan() {
 		str := fileScanner.Text()
 
-		fmt.Print(str)
+		for i := 13; i < len(str); i++ {
+			found := true
+			for _, v := range str[i-13 : i+1] {
+				// fmt.Println(str[i-13 : i+1])
+				if strings.Count(str[i-13:i+1], string(v)) > 1 {
+					found = false
+					break
+				}
+			}
+
+			if !found {
+				continue
+			} else {
+				fmt.Println(i + 1)
+				break
+			}
+		}
 	}
 }
