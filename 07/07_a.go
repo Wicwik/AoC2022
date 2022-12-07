@@ -4,7 +4,16 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
+
+type dir struct {
+	name      string
+	size      uint64
+	parentdir *dir
+	subdirs   map[string]*dir
+}
 
 func check(e error) {
 	if e != nil {
@@ -20,6 +29,69 @@ func sum(array []int) int {
 	return result
 }
 
+var current_dir *dir
+var root_dir dir
+
+func update_parents(parent *dir, filesize uint64) {
+	if parent != nil {
+		fmt.Println(parent)
+
+		parent.size += filesize
+		update_parents(parent.parentdir, filesize)
+	}
+}
+
+func tree_sum(current *dir, sum uint64) uint64 {
+
+	for _, value := range current.subdirs {
+		if value.size <= 100000 {
+			sum += tree_sum(value, value.size)
+		} else {
+			sum += tree_sum(value, 0)
+		}
+	}
+	return sum
+}
+
+func parseCommand(command string, fileScanner *bufio.Scanner) {
+	command_slc := strings.Split(command, " ")
+	// fmt.Println(command_slc)
+
+	if command_slc[0] == "ls" {
+		for fileScanner.Scan() {
+			str := fileScanner.Text()
+			str_split := strings.Split(str, " ")
+			// fmt.Println(str)
+
+			if str[0] == '$' {
+				command_slc = str_split[1:]
+				break
+			} else if str_split[0] == "dir" {
+				current_dir.subdirs[str_split[1]] = &dir{str_split[1], 0, current_dir, make(map[string]*dir)}
+			} else {
+				filesize, err := strconv.Atoi(str_split[0])
+				check(err)
+
+				fmt.Println(current_dir)
+				current_dir.size += uint64(filesize)
+
+				update_parents(current_dir.parentdir, uint64(filesize))
+			}
+		}
+	}
+
+	// fmt.Println(command_slc)
+	if command_slc[0] == "cd" {
+		// fmt.Println("CD")
+		if command_slc[1] == ".." {
+			current_dir = current_dir.parentdir
+		} else if command_slc[1] != "/" {
+			// fmt.Println(command_slc[1])
+			current_dir = current_dir.subdirs[command_slc[1]]
+		}
+	}
+}
+
 func main() {
 	readFile, err := os.Open("./input.txt")
 
@@ -28,9 +100,17 @@ func main() {
 	fileScanner := bufio.NewScanner(readFile)
 	fileScanner.Split(bufio.ScanLines)
 
+	root_dir = dir{"/", 0, nil, make(map[string]*dir)}
+	current_dir = &root_dir
+
 	for fileScanner.Scan() {
 		str := fileScanner.Text()
 
-		fmt.Print(str)
+		if str[0] == '$' {
+			parseCommand(str[2:], fileScanner)
+		}
 	}
+
+	fmt.Println(root_dir)
+	fmt.Println(tree_sum(&root_dir, 0))
 }
